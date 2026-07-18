@@ -16,6 +16,9 @@ export function App() {
   const [editing, setEditing] = useState<Meal | null>(null)
   const [toast, setToast] = useState('')
   const active = useMemo(() => meals.filter(m => !m.archived), [meals])
+  const todayMeal = useMemo(() => meals
+    .flatMap(meal => meal.cookedDates.filter(date => isToday(Number(date))).map(date => ({ meal, date: Number(date) })))
+    .sort((a, b) => b.date - a.date)[0]?.meal ?? null, [meals])
 
   useEffect(() => { if (!toast) return; const timer = setTimeout(() => setToast(''), 2800); return () => clearTimeout(timer) }, [toast])
 
@@ -47,6 +50,14 @@ export function App() {
     setMeals(items => items.map(meal => meal.id === suggestion.meal.id ? { ...meal, cookedDates: [...meal.cookedDates, String(Date.now())], consecutiveRejections: 0 } : meal))
     setSuggestion(null); setExcluded([]); setToast('Dobrú chuť! Zapísané ako dnešné jedlo.')
   }
+  const undoToday = () => {
+    if (!todayMeal) return
+    const updated = meals.map(meal => meal.id === todayMeal.id ? { ...meal, cookedDates: meal.cookedDates.filter(date => !isToday(Number(date))) } : meal)
+    setMeals(updated)
+    setExcluded([todayMeal.id])
+    setSuggestion(recommend(updated, [todayMeal.id]))
+    setToast('Dnešný výber je zrušený. Skúsime niečo iné.')
+  }
   const saveMeal = (name: string) => {
     const clean = name.trim(); if (!clean) return
     if (editing) setMeals(items => items.map(m => m.id === editing.id ? { ...m, name: clean } : m))
@@ -62,7 +73,7 @@ export function App() {
     </header>
 
     <main>
-      {screen === 'home' && <Home activeCount={active.length} suggestion={suggestion} onSuggest={() => suggest(true)} onAccept={accept} onReject={reject} onMeals={() => setScreen('meals')} />}
+      {screen === 'home' && <Home activeCount={active.length} todayMeal={todayMeal} suggestion={suggestion} onSuggest={() => suggest(true)} onAccept={accept} onReject={reject} onUndoToday={undoToday} onMeals={() => setScreen('meals')} />}
       {screen === 'meals' && <MealList meals={active} cloudEnabled={cloudEnabled} syncing={syncing} onLogout={logout} onAdd={() => setShowAdd(true)} onEdit={setEditing} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} onArchive={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: true } : x))} onArchiveScreen={() => setScreen('archive')} />}
       {screen === 'archive' && <ArchiveList meals={meals.filter(m => m.archived)} onRestore={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: false, consecutiveRejections: 0 } : x))} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} />}
     </main>
@@ -72,9 +83,13 @@ export function App() {
   </div>
 }
 
-function Home({ activeCount, suggestion, onSuggest, onAccept, onReject, onMeals }: { activeCount: number; suggestion: ScoredMeal | null; onSuggest: () => void; onAccept: () => void; onReject: () => void; onMeals: () => void }) {
+function Home({ activeCount, todayMeal, suggestion, onSuggest, onAccept, onReject, onUndoToday, onMeals }: { activeCount: number; todayMeal: Meal | null; suggestion: ScoredMeal | null; onSuggest: () => void; onAccept: () => void; onReject: () => void; onUndoToday: () => void; onMeals: () => void }) {
   return <section className="home">
-    {!suggestion ? <>
+    {todayMeal ? <div className="suggestion-wrap chosen-wrap">
+      <span className="suggestion-label"><Check size={15}/> DNES VARÍME</span>
+      <article className="suggestion-card chosen-card"><div className="mini-plate"><ChefHat /></div><h2>{todayMeal.name}</h2><p>Dnešné jedlo je vybrané</p></article>
+      <button className="secondary" onClick={onUndoToday}><RotateCcw/> Chcem niečo iné</button>
+    </div> : !suggestion ? <>
       <div className="hero-art"><div className="plate"><ChefHat /></div><span className="steam s1">∿</span><span className="steam s2">∿</span><span className="dot d1"/><span className="dot d2"/></div>
       <div className="intro compact-intro"><h2>Čo dobré si dnes dáme?</h2></div>
       <button className="primary huge" onClick={onSuggest} disabled={!activeCount}><Sparkles /> Navrhni mi jedlo</button>
@@ -87,6 +102,11 @@ function Home({ activeCount, suggestion, onSuggest, onAccept, onReject, onMeals 
     </div>}
     <button className="collection-link" onClick={onMeals}><span><History/> Uložené jedlá</span><small>{activeCount} {activeCount === 1 ? 'jedlo' : 'jedál'} v zbierke</small></button>
   </section>
+}
+
+function isToday(timestamp: number, now = new Date()) {
+  const date = new Date(timestamp)
+  return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate()
 }
 
 function MealList({ meals, cloudEnabled, syncing, onLogout, onAdd, onEdit, onDelete, onArchive, onArchiveScreen }: { meals: Meal[]; cloudEnabled: boolean; syncing: boolean; onLogout: () => void; onAdd: () => void; onEdit: (m: Meal) => void; onDelete: (id: string) => void; onArchive: (id: string) => void; onArchiveScreen: () => void }) {
