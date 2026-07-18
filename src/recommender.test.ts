@@ -16,6 +16,12 @@ describe('recommender', () => {
     const rejected = meal({ rejectionDates: [String(now.getTime())], consecutiveRejections: 2 })
     expect(scoreMeal(rejected, now).score).toBeLessThan(scoreMeal(normal, now).score)
   })
+  it('describes recency in days and then months', () => {
+    const tenDaysAgo = String(now.getTime() - 10 * 86_400_000)
+    const sixtyDaysAgo = String(now.getTime() - 60 * 86_400_000)
+    expect(scoreMeal(meal({ cookedDates: [tenDaysAgo] }), now).reasons).toContain('naposledy pred 10 dňami')
+    expect(scoreMeal(meal({ cookedDates: [sixtyDaysAgo] }), now).reasons).toContain('naposledy pred 2 mesiacmi')
+  })
   it('never recommends archived or excluded meals', () => {
     const archived = meal({ archived: true })
     const excluded = meal({ id: '2' })

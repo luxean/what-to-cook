@@ -22,10 +22,18 @@ export function scoreMeal(meal: Meal, now = new Date()): ScoredMeal {
   const reasons: string[] = []
   if (cookCount >= 3) reasons.push('patrí medzi obľúbené')
   if (lastCooked === null) reasons.push('ešte nebolo')
-  else if (daysAgo >= 21) reasons.push('dlho nebolo')
-  else if (daysAgo >= 7) reasons.push(`naposledy pred ${Math.floor(daysAgo)} dňami`)
+  else reasons.push(recencyReason(daysAgo))
 
   return { meal, score: favoriteScore + recencyScore + exploration - rejectionPenalty, reasons }
+}
+
+function recencyReason(daysAgo: number) {
+  const days = Math.floor(daysAgo)
+  if (days === 0) return 'naposledy dnes'
+  if (days === 1) return 'naposledy včera'
+  if (days < 30) return `naposledy pred ${days} dňami`
+  const months = Math.floor(days / 30)
+  return months === 1 ? 'naposledy pred mesiacom' : `naposledy pred ${months} mesiacmi`
 }
 
 export function recommend(meals: Meal[], excludedIds: string[] = [], now = new Date(), random = Math.random): ScoredMeal | null {
