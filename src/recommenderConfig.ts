@@ -11,7 +11,7 @@ export const RECOMMENDER_CONFIG = Object.freeze({
   maximumRecencyScore: 4.5,
   approximateDaysPerMonthForDisplay: 30,
 
-  neverCookedExplorationBonus: 1.8,
+  neverCookedExplorationBonus: 0.75,
 
   rejectionPenaltyDecayDays: 14,
   baseRejectionPenalty: 2.2,
