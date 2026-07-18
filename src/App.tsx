@@ -63,10 +63,14 @@ export function App() {
     setExcluded([])
     setSuggestion(null)
   }
-  const saveMeal = (name: string) => {
+  const saveMeal = (name: string, cookedToday = false) => {
     const clean = name.trim(); if (!clean) return
     if (editing) setMeals(items => items.map(m => m.id === editing.id ? { ...m, name: clean } : m))
-    else setMeals(items => [...items, { id: crypto.randomUUID(), name: clean, cookedDates: [], rejectionDates: [], consecutiveRejections: 0, archived: false, createdAt: String(Date.now()) }])
+    else setMeals(items => {
+      const existing = cookedToday ? items.map(meal => ({ ...meal, cookedDates: meal.cookedDates.filter(date => !isToday(Number(date))) })) : items
+      return [...existing, { id: crypto.randomUUID(), name: clean, cookedDates: cookedToday ? [String(Date.now())] : [], rejectionDates: [], consecutiveRejections: 0, archived: false, createdAt: String(Date.now()) }]
+    })
+    if (!editing && cookedToday) setScreen('home')
     setEditing(null); setShowAdd(false); setToast(editing ? 'Názov je upravený.' : 'Nové jedlo je v zozname.')
   }
 
@@ -140,7 +144,8 @@ function ArchiveList({ meals, onRestore, onDelete }: { meals: Meal[]; onRestore:
 
 function Empty({ text }: { text: string }) { return <div className="empty"><ChefHat/><strong>{text}</strong><span>Všetko je na svojom mieste.</span></div> }
 
-function MealDialog({ initial = '', onSave, onClose }: { initial?: string; onSave: (name: string) => void; onClose: () => void }) {
+function MealDialog({ initial = '', onSave, onClose }: { initial?: string; onSave: (name: string, cookedToday?: boolean) => void; onClose: () => void }) {
   const [name, setName] = useState(initial)
-  return <div className="overlay" onMouseDown={e => e.target === e.currentTarget && onClose()}><form className="dialog" onSubmit={e => { e.preventDefault(); onSave(name) }}><div className="dialog-icon"><ChefHat/></div><h2>{initial ? 'Upraviť jedlo' : 'Pridať nové jedlo'}</h2><p>Ako sa jedlo volá?</p><input autoFocus value={name} onChange={e => setName(e.target.value)} placeholder="Napr. paradajková polievka" maxLength={80}/><button className="primary" disabled={!name.trim()}>{initial ? 'Uložiť zmenu' : 'Pridať jedlo'}</button><button type="button" className="text-btn" onClick={onClose}>Zrušiť</button></form></div>
+  const [cookedToday, setCookedToday] = useState(false)
+  return <div className="overlay" onMouseDown={e => e.target === e.currentTarget && onClose()}><form className="dialog" onSubmit={e => { e.preventDefault(); onSave(name, cookedToday) }}><div className="dialog-icon"><ChefHat/></div><h2>{initial ? 'Upraviť jedlo' : 'Pridať nové jedlo'}</h2><p>Ako sa jedlo volá?</p><input autoFocus value={name} onChange={e => setName(e.target.value)} placeholder="Napr. paradajková polievka" maxLength={80}/>{!initial && <button type="button" className={`today-toggle${cookedToday ? ' selected' : ''}`} onClick={() => setCookedToday(value => !value)}><span className="toggle-check">{cookedToday && <Check/>}</span>Dnes ho varím</button>}<button className="primary" disabled={!name.trim()}>{initial ? 'Uložiť zmenu' : 'Pridať jedlo'}</button><button type="button" className="text-btn" onClick={onClose}>Zrušiť</button></form></div>
 }
