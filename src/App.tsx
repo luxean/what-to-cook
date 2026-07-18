@@ -19,6 +19,7 @@ export function App() {
   const todayMeal = useMemo(() => meals
     .flatMap(meal => meal.cookedDates.filter(date => isToday(Number(date))).map(date => ({ meal, date: Number(date) })))
     .sort((a, b) => b.date - a.date)[0]?.meal ?? null, [meals])
+  const exhausted = active.length > 0 && active.every(meal => excluded.includes(meal.id)) && !suggestion
 
   useEffect(() => { if (!toast) return; const timer = setTimeout(() => setToast(''), 2800); return () => clearTimeout(timer) }, [toast])
 
@@ -58,6 +59,10 @@ export function App() {
     setSuggestion(null)
     setToast('Dnešný výber je zrušený.')
   }
+  const resetSuggestions = () => {
+    setExcluded([])
+    setSuggestion(null)
+  }
   const saveMeal = (name: string) => {
     const clean = name.trim(); if (!clean) return
     if (editing) setMeals(items => items.map(m => m.id === editing.id ? { ...m, name: clean } : m))
@@ -73,7 +78,7 @@ export function App() {
     </header>
 
     <main>
-      {screen === 'home' && <Home activeCount={active.length} todayMeal={todayMeal} suggestion={suggestion} onSuggest={() => suggest()} onAccept={accept} onReject={reject} onUndoToday={undoToday} onMeals={() => setScreen('meals')} />}
+      {screen === 'home' && <Home activeCount={active.length} todayMeal={todayMeal} exhausted={exhausted} suggestion={suggestion} onSuggest={() => suggest()} onAccept={accept} onReject={reject} onUndoToday={undoToday} onResetSuggestions={resetSuggestions} onMeals={() => setScreen('meals')} />}
       {screen === 'meals' && <MealList meals={active} cloudEnabled={cloudEnabled} syncing={syncing} onLogout={logout} onAdd={() => setShowAdd(true)} onEdit={setEditing} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} onArchive={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: true } : x))} onArchiveScreen={() => setScreen('archive')} />}
       {screen === 'archive' && <ArchiveList meals={meals.filter(m => m.archived)} onRestore={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: false, consecutiveRejections: 0 } : x))} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} />}
     </main>
@@ -83,12 +88,16 @@ export function App() {
   </div>
 }
 
-function Home({ activeCount, todayMeal, suggestion, onSuggest, onAccept, onReject, onUndoToday, onMeals }: { activeCount: number; todayMeal: Meal | null; suggestion: ScoredMeal | null; onSuggest: () => void; onAccept: () => void; onReject: () => void; onUndoToday: () => void; onMeals: () => void }) {
+function Home({ activeCount, todayMeal, exhausted, suggestion, onSuggest, onAccept, onReject, onUndoToday, onResetSuggestions, onMeals }: { activeCount: number; todayMeal: Meal | null; exhausted: boolean; suggestion: ScoredMeal | null; onSuggest: () => void; onAccept: () => void; onReject: () => void; onUndoToday: () => void; onResetSuggestions: () => void; onMeals: () => void }) {
   return <section className="home">
     {todayMeal ? <div className="suggestion-wrap chosen-wrap">
       <span className="suggestion-label"><Check size={15}/> DNES VARÍME</span>
       <article className="suggestion-card chosen-card"><div className="mini-plate"><ChefHat /></div><h2>{todayMeal.name}</h2><p>Dnešné jedlo je vybrané</p></article>
       <button className="secondary" onClick={onUndoToday}><RotateCcw/> Chcem niečo iné</button>
+    </div> : exhausted ? <div className="suggestion-wrap">
+      <span className="suggestion-label">VŠETKO PREJDENÉ</span>
+      <article className="suggestion-card"><div className="mini-plate"><ChefHat /></div><h2>To boli všetky jedlá</h2><p>Možno dostane niektoré druhú šancu?</p></article>
+      <button className="primary" onClick={onResetSuggestions}><RotateCcw/> Skúsiť odznova</button>
     </div> : !suggestion ? <>
       <div className="hero-art"><div className="plate"><ChefHat /></div><span className="steam s1">∿</span><span className="steam s2">∿</span><span className="dot d1"/><span className="dot d2"/></div>
       <div className="intro compact-intro"><h2>Čo dobré si dnes dáme?</h2></div>
