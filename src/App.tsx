@@ -4,6 +4,7 @@ import type { Meal } from './types'
 import { recommend, type ScoredMeal } from './recommender'
 import { useMealStore } from './useMealStore'
 import { AuthGate } from './AuthGate'
+import { RECOMMENDER_CONFIG } from './recommenderConfig'
 
 type Screen = 'home' | 'meals' | 'archive'
 type MealFilter = 'vegetarian' | 'fish'
@@ -49,11 +50,11 @@ export function App() {
     setMeals(items => items.map(meal => {
       if (meal.id !== id) return meal
       const count = meal.consecutiveRejections + 1
-      archived = count >= 4
+      archived = count >= RECOMMENDER_CONFIG.automaticArchiveRejectionThreshold
       return { ...meal, rejectionDates: [...meal.rejectionDates, String(Date.now())], consecutiveRejections: count, archived }
     }))
     const nextExcluded = [...excluded, id]; setExcluded(nextExcluded)
-    if (archived) setToast('Jedlo bolo po 4 odmietnutiach archivované.')
+    if (archived) setToast(`Jedlo bolo po ${RECOMMENDER_CONFIG.automaticArchiveRejectionThreshold} odmietnutiach archivované.`)
     const updated = meals.map(m => m.id === id ? { ...m, archived } : m)
     setSuggestion(recommend(updated.filter(meal => !meal.archived && (mealFilters.length === 0 || (mealFilters.includes('vegetarian') && meal.vegetarian) || (mealFilters.includes('fish') && meal.fish))), nextExcluded))
   }

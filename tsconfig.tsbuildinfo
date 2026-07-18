@@ -1,1 +1,1 @@
-{"root":["./src/App.tsx","./src/AuthGate.tsx","./src/main.tsx","./src/recommender.test.ts","./src/recommender.ts","./src/types.ts","./src/useMealStore.ts","./src/vite-env.d.ts"],"version":"5.9.3"}
+{"root":["./src/App.tsx","./src/AuthGate.tsx","./src/main.tsx","./src/recommender.test.ts","./src/recommender.ts","./src/recommenderConfig.ts","./src/types.ts","./src/useMealStore.ts","./src/vite-env.d.ts"],"version":"5.9.3"}
