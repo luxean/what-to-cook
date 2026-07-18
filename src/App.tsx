@@ -117,11 +117,11 @@ function Home({ activeCount, candidateCount, archivedCount, mealFilters, todayMe
       <button className="secondary" onClick={onUndoToday}><RotateCcw/> Chcem niečo iné</button>
     </div> : exhausted ? <div className="suggestion-wrap">
       <span className="suggestion-label">VŠETKO PREJDENÉ</span>
-      <article className="suggestion-card"><div className="mini-plate"><ChefHat /></div><h2>To boli všetky jedlá</h2><p>Možno dostane niektoré druhú šancu?</p></article>
+      <article className="suggestion-card"><div className="mini-plate"><ChefHat /></div><h2>To boli všetky jedlá</h2></article>
       <button className="primary" onClick={onResetSuggestions}><RotateCcw/> Skúsiť odznova</button>
     </div> : !suggestion ? <>
       <div className="hero-art"><div className="plate"><ChefHat /></div><span className="steam s1">∿</span><span className="steam s2">∿</span><span className="dot d1"/><span className="dot d2"/></div>
-      <div className="intro compact-intro"><h2>Čo dobré si dnes dáme?</h2></div>
+      <div className="intro compact-intro"><h2>Čo to dnes bude?</h2></div>
       <button className="primary huge" onClick={onSuggest} disabled={!candidateCount}><Sparkles /> Navrhni mi jedlo</button>
       {!activeCount && <p className="empty-note">Najprv pridaj aspoň jedno jedlo.</p>}
       {activeCount > 0 && !candidateCount && <p className="empty-note">Pre tento filter nemáš uložené žiadne jedlá.</p>}
