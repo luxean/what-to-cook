@@ -55,8 +55,8 @@ export function App() {
     const updated = meals.map(meal => meal.id === todayMeal.id ? { ...meal, cookedDates: meal.cookedDates.filter(date => !isToday(Number(date))) } : meal)
     setMeals(updated)
     setExcluded([todayMeal.id])
-    setSuggestion(recommend(updated, [todayMeal.id]))
-    setToast('Dnešný výber je zrušený. Skúsime niečo iné.')
+    setSuggestion(null)
+    setToast('Dnešný výber je zrušený.')
   }
   const saveMeal = (name: string) => {
     const clean = name.trim(); if (!clean) return
@@ -73,7 +73,7 @@ export function App() {
     </header>
 
     <main>
-      {screen === 'home' && <Home activeCount={active.length} todayMeal={todayMeal} suggestion={suggestion} onSuggest={() => suggest(true)} onAccept={accept} onReject={reject} onUndoToday={undoToday} onMeals={() => setScreen('meals')} />}
+      {screen === 'home' && <Home activeCount={active.length} todayMeal={todayMeal} suggestion={suggestion} onSuggest={() => suggest()} onAccept={accept} onReject={reject} onUndoToday={undoToday} onMeals={() => setScreen('meals')} />}
       {screen === 'meals' && <MealList meals={active} cloudEnabled={cloudEnabled} syncing={syncing} onLogout={logout} onAdd={() => setShowAdd(true)} onEdit={setEditing} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} onArchive={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: true } : x))} onArchiveScreen={() => setScreen('archive')} />}
       {screen === 'archive' && <ArchiveList meals={meals.filter(m => m.archived)} onRestore={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: false, consecutiveRejections: 0 } : x))} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} />}
     </main>
