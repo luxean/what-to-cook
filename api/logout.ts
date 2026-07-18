@@ -1,4 +1,6 @@
 import { clearSessionCookie } from './_session.js'
-export default function handler() {
-  return Response.json({ ok: true }, { headers: { 'Set-Cookie': clearSessionCookie() } })
+import { json, type ApiRequest, type ApiResponse } from './_http.js'
+
+export default function handler(_request: ApiRequest, response: ApiResponse) {
+  return json(response, 200, { ok: true }, { 'Set-Cookie': clearSessionCookie() })
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { hasSession } from './_session.js'
+import { json, type ApiRequest, type ApiResponse } from './_http.js'
 
 function database() {
   const url = process.env.SUPABASE_URL
@@ -8,25 +9,25 @@ function database() {
   return createClient(url, key, { auth: { persistSession: false } })
 }
 
-export default async function handler(request: Request) {
-  if (!hasSession(request)) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+export default async function handler(request: ApiRequest, response: ApiResponse) {
+  if (!hasSession(request.headers.cookie)) return json(response, 401, { error: 'Unauthorized' })
   try {
     const db = database()
     if (request.method === 'GET') {
       const { data, error } = await db.from('app_data').select('meals').eq('id', 'home').maybeSingle()
       if (error) throw error
-      return Response.json({ meals: data?.meals ?? null })
+      return json(response, 200, { meals: data?.meals ?? null })
     }
     if (request.method === 'PUT') {
-      const body = await request.json()
-      if (!Array.isArray(body.meals)) return Response.json({ error: 'Invalid meals' }, { status: 400 })
-      const { error } = await db.from('app_data').upsert({ id: 'home', meals: body.meals, updated_at: new Date().toISOString() })
+      const body = typeof request.body === 'string' ? JSON.parse(request.body) : request.body
+      if (!Array.isArray((body as { meals?: unknown })?.meals)) return json(response, 400, { error: 'Invalid meals' })
+      const { error } = await db.from('app_data').upsert({ id: 'home', meals: (body as { meals: unknown[] }).meals, updated_at: new Date().toISOString() })
       if (error) throw error
-      return Response.json({ ok: true })
+      return json(response, 200, { ok: true })
     }
-    return Response.json({ error: 'Method not allowed' }, { status: 405 })
+    return json(response, 405, { error: 'Method not allowed' })
   } catch (error) {
     console.error(error)
-    return Response.json({ error: 'Database unavailable' }, { status: 503 })
+    return json(response, 503, { error: 'Database unavailable' })
   }
 }

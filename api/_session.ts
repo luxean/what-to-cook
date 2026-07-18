@@ -21,8 +21,8 @@ export function clearSessionCookie() {
   return `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`
 }
 
-export function hasSession(request: Request) {
-  const value = request.headers.get('cookie')?.split(';').map(item => item.trim()).find(item => item.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1)
+export function hasSession(cookieHeader?: string) {
+  const value = cookieHeader?.split(';').map(item => item.trim()).find(item => item.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1)
   if (!value) return false
   const [payload, signature] = value.split('.')
   if (!payload || !signature || signature.length !== sign(payload).length) return false

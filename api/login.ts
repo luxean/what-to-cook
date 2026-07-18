@@ -1,9 +1,14 @@
 import { passcodeMatches, sessionCookie } from './_session.js'
+import { json, type ApiRequest, type ApiResponse } from './_http.js'
 
-export default async function handler(request: Request) {
-  if (request.method !== 'POST') return Response.json({ error: 'Method not allowed' }, { status: 405 })
-  let passcode = ''
-  try { passcode = String((await request.json()).passcode ?? '') } catch { /* invalid input */ }
-  if (!passcodeMatches(passcode)) return Response.json({ error: 'Invalid passcode' }, { status: 401 })
-  return Response.json({ ok: true }, { headers: { 'Set-Cookie': sessionCookie() } })
+export default function handler(request: ApiRequest, response: ApiResponse) {
+  if (request.method !== 'POST') return json(response, 405, { error: 'Method not allowed' })
+  const body = typeof request.body === 'string' ? safeParse(request.body) : request.body
+  const passcode = String((body as { passcode?: unknown } | undefined)?.passcode ?? '')
+  if (!passcodeMatches(passcode)) return json(response, 401, { error: 'Invalid passcode' })
+  return json(response, 200, { ok: true }, { 'Set-Cookie': sessionCookie() })
+}
+
+function safeParse(value: string): unknown {
+  try { return JSON.parse(value) } catch { return undefined }
 }

@@ -9,7 +9,7 @@ export function AuthGate({ onLogin }: { onLogin: () => void }) {
     if (!passcode.trim()) return
     setBusy(true); setError('')
     try {
-      const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ passcode }) })
+      const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ passcode }), signal: AbortSignal.timeout(10_000) })
       if (!response.ok) throw new Error()
       onLogin()
     } catch { setError('Tento kód nesedí. Skús ho zadať ešte raz.') }

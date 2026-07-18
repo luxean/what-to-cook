@@ -17,7 +17,7 @@ export function useMealStore() {
     if (!cloudEnabled) return
     setSyncing(true)
     try {
-      const response = await fetch('/api/meals')
+      const response = await fetch('/api/meals', { signal: AbortSignal.timeout(10_000) })
       if (response.status === 401) { setAuthenticated(false); setAuthReady(true); return }
       if (!response.ok) throw new Error()
       const data = await response.json()
@@ -33,7 +33,7 @@ export function useMealStore() {
     if (!cloudEnabled || !authenticated || !hydrated.current) return
     const timer = window.setTimeout(async () => {
       setSyncing(true)
-      try { await fetch('/api/meals', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ meals }) }) } finally { setSyncing(false) }
+      try { await fetch('/api/meals', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ meals }), signal: AbortSignal.timeout(10_000) }) } finally { setSyncing(false) }
     }, 500)
     return () => clearTimeout(timer)
   }, [meals, authenticated])
