@@ -15,13 +15,13 @@ export function App() {
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<Meal | null>(null)
   const [toast, setToast] = useState('')
+  const active = useMemo(() => meals.filter(m => !m.archived), [meals])
 
   useEffect(() => { if (!toast) return; const timer = setTimeout(() => setToast(''), 2800); return () => clearTimeout(timer) }, [toast])
 
   if (!authReady) return <div className="app-loading"><LoaderCircle /></div>
   if (cloudEnabled && !authenticated) return <AuthGate onLogin={login} />
 
-  const active = useMemo(() => meals.filter(m => !m.archived), [meals])
   const suggest = (reset = false) => {
     const skip = reset ? [] : excluded
     const result = recommend(meals, skip)
