@@ -57,7 +57,7 @@ export function App() {
   return <div className="app-shell">
     <header>
       {screen !== 'home' ? <button className="icon-btn" onClick={() => setScreen('home')} aria-label="Späť"><ArrowLeft /></button> : <div className="brand-icon"><ChefHat /></div>}
-      <div><span className="eyebrow">MAMIN POMOCNÍK</span><h1>{screen === 'home' ? 'Čo navariť?' : screen === 'meals' ? 'Moje jedlá' : 'Archív'}</h1></div>
+      <div><h1>{screen === 'home' ? 'Čo navariť?' : screen === 'meals' ? 'Uložené jedlá' : 'Archív'}</h1></div>
       {screen === 'home' && <button className="icon-btn" onClick={() => setScreen('meals')} aria-label="Jedlá"><MoreHorizontal /></button>}
     </header>
 
@@ -76,7 +76,7 @@ function Home({ activeCount, suggestion, onSuggest, onAccept, onReject, onMeals 
   return <section className="home">
     {!suggestion ? <>
       <div className="hero-art"><div className="plate"><ChefHat /></div><span className="steam s1">∿</span><span className="steam s2">∿</span><span className="dot d1"/><span className="dot d2"/></div>
-      <div className="intro"><h2>Čo dobré si dnes dáme?</h2><p>Vyberiem niečo, čo máš rada a už dlho nebolo.</p></div>
+      <div className="intro compact-intro"><h2>Čo dobré si dnes dáme?</h2></div>
       <button className="primary huge" onClick={onSuggest} disabled={!activeCount}><Sparkles /> Navrhni mi jedlo</button>
       {!activeCount && <p className="empty-note">Najprv pridaj aspoň jedno jedlo.</p>}
     </> : <div className="suggestion-wrap">
@@ -85,7 +85,7 @@ function Home({ activeCount, suggestion, onSuggest, onAccept, onReject, onMeals 
       <button className="primary" onClick={onAccept}><Check/> To znie dobre</button>
       <button className="secondary" onClick={onReject}><X/> Dnes nie, skús iné</button>
     </div>}
-    <button className="collection-link" onClick={onMeals}><span><History/> Moje jedlá</span><small>{activeCount} {activeCount === 1 ? 'jedlo' : 'jedál'} v zbierke</small></button>
+    <button className="collection-link" onClick={onMeals}><span><History/> Uložené jedlá</span><small>{activeCount} {activeCount === 1 ? 'jedlo' : 'jedál'} v zbierke</small></button>
   </section>
 }
 

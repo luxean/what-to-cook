@@ -5,3 +5,4 @@
 .auth-error{display:block;color:#b74431;font-size:12px;text-align:left;margin:-4px 0 13px}.mail-sent{width:62px;height:62px;border-radius:50%;background:#dfe9df;color:var(--sage);display:grid;place-items:center;margin:25px auto 10px}
 .app-loading{min-height:100vh;display:grid;place-items:center;color:var(--coral)}.spin,.app-loading svg{animation:spin 1s linear infinite}
 .cloud-status{border-top:1px solid var(--line);margin-top:20px;padding-top:18px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)}.cloud-status span,.cloud-status button{display:flex;align-items:center;gap:6px}.cloud-status svg{width:15px;height:15px}.cloud-status button{border:0;background:transparent;color:var(--muted);padding:5px}@keyframes spin{to{transform:rotate(360deg)}}
+.intro.compact-intro h2{margin-bottom:25px}
