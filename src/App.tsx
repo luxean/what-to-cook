@@ -78,7 +78,7 @@ export function App() {
     </header>
 
     <main>
-      {screen === 'home' && <Home activeCount={active.length} todayMeal={todayMeal} exhausted={exhausted} suggestion={suggestion} onSuggest={() => suggest()} onAccept={accept} onReject={reject} onUndoToday={undoToday} onResetSuggestions={resetSuggestions} onMeals={() => setScreen('meals')} />}
+      {screen === 'home' && <Home activeCount={active.length} archivedCount={meals.length - active.length} todayMeal={todayMeal} exhausted={exhausted} suggestion={suggestion} onSuggest={() => suggest()} onAccept={accept} onReject={reject} onUndoToday={undoToday} onResetSuggestions={resetSuggestions} onMeals={() => setScreen('meals')} onArchive={() => setScreen('archive')} />}
       {screen === 'meals' && <MealList meals={active} cloudEnabled={cloudEnabled} syncing={syncing} onLogout={logout} onAdd={() => setShowAdd(true)} onEdit={setEditing} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} onArchive={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: true } : x))} onArchiveScreen={() => setScreen('archive')} />}
       {screen === 'archive' && <ArchiveList meals={meals.filter(m => m.archived)} onRestore={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: false, consecutiveRejections: 0 } : x))} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} />}
     </main>
@@ -88,7 +88,7 @@ export function App() {
   </div>
 }
 
-function Home({ activeCount, todayMeal, exhausted, suggestion, onSuggest, onAccept, onReject, onUndoToday, onResetSuggestions, onMeals }: { activeCount: number; todayMeal: Meal | null; exhausted: boolean; suggestion: ScoredMeal | null; onSuggest: () => void; onAccept: () => void; onReject: () => void; onUndoToday: () => void; onResetSuggestions: () => void; onMeals: () => void }) {
+function Home({ activeCount, archivedCount, todayMeal, exhausted, suggestion, onSuggest, onAccept, onReject, onUndoToday, onResetSuggestions, onMeals, onArchive }: { activeCount: number; archivedCount: number; todayMeal: Meal | null; exhausted: boolean; suggestion: ScoredMeal | null; onSuggest: () => void; onAccept: () => void; onReject: () => void; onUndoToday: () => void; onResetSuggestions: () => void; onMeals: () => void; onArchive: () => void }) {
   return <section className="home">
     {todayMeal ? <div className="suggestion-wrap chosen-wrap">
       <span className="suggestion-label"><Check size={15}/> DNES VARÍME</span>
@@ -110,6 +110,7 @@ function Home({ activeCount, todayMeal, exhausted, suggestion, onSuggest, onAcce
       <button className="secondary" onClick={onReject}><X/> Dnes nie, skús iné</button>
     </div>}
     <button className="collection-link" onClick={onMeals}><span><History/> Uložené jedlá</span><small>{mealCountLabel(activeCount)}</small></button>
+    <button className="home-archive-link" onClick={onArchive}><span><Archive/> Archivované jedlá</span><small>{mealCountLabel(archivedCount)}</small></button>
   </section>
 }
 
