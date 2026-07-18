@@ -109,13 +109,19 @@ function Home({ activeCount, todayMeal, exhausted, suggestion, onSuggest, onAcce
       <button className="primary" onClick={onAccept}><Check/> To znie dobre</button>
       <button className="secondary" onClick={onReject}><X/> Dnes nie, skús iné</button>
     </div>}
-    <button className="collection-link" onClick={onMeals}><span><History/> Uložené jedlá</span><small>{activeCount} {activeCount === 1 ? 'jedlo' : 'jedál'} v zbierke</small></button>
+    <button className="collection-link" onClick={onMeals}><span><History/> Uložené jedlá</span><small>{mealCountLabel(activeCount)}</small></button>
   </section>
 }
 
 function isToday(timestamp: number, now = new Date()) {
   const date = new Date(timestamp)
   return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate()
+}
+
+function mealCountLabel(count: number) {
+  if (count === 1) return '1 jedlo'
+  if (count >= 2 && count <= 4) return `${count} jedlá`
+  return `${count} jedál`
 }
 
 function MealList({ meals, cloudEnabled, syncing, onLogout, onAdd, onEdit, onDelete, onArchive, onArchiveScreen }: { meals: Meal[]; cloudEnabled: boolean; syncing: boolean; onLogout: () => void; onAdd: () => void; onEdit: (m: Meal) => void; onDelete: (id: string) => void; onArchive: (id: string) => void; onArchiveScreen: () => void }) {
