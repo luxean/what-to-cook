@@ -29,17 +29,42 @@ The score in `src/recommender.ts` combines:
 
 The app draws from the five highest-scoring meals with weighted randomness, so it stays varied.
 
-## Supabase setup
+## Supabase setup and migrations
 
 1. Create a free Supabase project.
-2. Open **SQL Editor**, paste [`supabase/schema.sql`](supabase/schema.sql), and run it once.
-3. Copy `.env.example` to `.env.local` for local API testing and fill in the server values. Do not commit this file.
+2. Install project dependencies with `npm install`. The Supabase CLI is pinned as a local development dependency, so no global installation is needed.
+3. Authenticate and link this repository to the remote project using the local CLI:
+
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref YOUR_PROJECT_REFERENCE
+   ```
+
+   The reference is the subdomain from `https://YOUR_PROJECT_REFERENCE.supabase.co`. Linking may ask for the database password chosen when the project was created.
+
+4. Apply all committed migrations:
+
+   ```bash
+   npx supabase db push
+   ```
+
+5. Confirm that `app_data` appears under Supabase **Table Editor**. Copy `.env.example` to `.env.local` for local API testing and fill in the server values. Do not commit this file.
+
+The CLI records applied migrations in the remote database, so `db push` applies only files that have not run yet. Do not edit a migration after it has been applied. For a future schema change, create and commit a new one:
+
+```bash
+npx supabase migration new add_meal_notes
+# edit the new file in supabase/migrations/
+npx supabase db push
+```
+
+Review migration SQL before pushing it. Keep destructive changes, such as dropping a column, in their own clearly named migration and back up important data first.
 
 ## GitLab and Vercel deployment
 
 1. Create a private project in your personal GitLab namespace and push this directory to its `main` branch.
 2. In Vercel, select **Add New → Project**, connect GitLab, and import the repository.
-3. Add the five values shown in `.env.example` under Vercel **Environment Variables** for Production and Preview.
+3. Add the five values below under Vercel **Project → Settings → Environment Variables**. Enable at least **Production** for each value.
 4. Deploy. `vercel.json` already selects the build command, `dist` directory, and SPA routing.
 5. No Supabase authentication or redirect URL setup is required.
 
@@ -65,4 +90,13 @@ Store the output as `APP_PASSCODE_HASH`. Generate the independent cookie-signing
 openssl rand -hex 32
 ```
 
-Store that output as `SESSION_SECRET`. `SUPABASE_SERVICE_ROLE_KEY`, `APP_PASSCODE_HASH`, and `SESSION_SECRET` are server-only and must **not** start with `VITE_`. Only `VITE_CLOUD_ENABLED=true` is public.
+Store that output as `SESSION_SECRET`. `SUPABASE_SECRET_KEY`, `APP_PASSCODE_HASH`, and `SESSION_SECRET` are server-only and must **not** start with `VITE_`. Only `VITE_CLOUD_ENABLED=true` is public.
+
+### Exact Supabase values
+
+In Supabase, open **Project Settings → API Keys** (or the project's **Connect** dialog):
+
+- `SUPABASE_URL`: the project URL, shaped like `https://abcdefgh.supabase.co`.
+- `SUPABASE_SECRET_KEY`: create/copy a **Secret key** beginning with `sb_secret_`. Do not use the publishable key. The legacy `service_role` key also works, but the current secret key is preferred.
+
+The secret key is intentionally used only by the Vercel `/api` functions. It never enters the Vite browser bundle. After adding or changing Vercel variables, trigger a new deployment from **Deployments → Redeploy**.

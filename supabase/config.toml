@@ -1,0 +1,13 @@
+# Supabase CLI project configuration. Remote credentials are never stored here.
+project_id = "co-navarit"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+
+[db]
+major_version = 17
+
+[studio]
+enabled = true

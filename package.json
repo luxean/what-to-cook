@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && tsc -p tsconfig.api.json && vite build",
     "preview": "vite preview",
     "test": "vitest run"
   },
@@ -15,13 +15,14 @@
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "typescript": "latest",
     "vite": "latest"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "supabase": "^2.109.1",
+    "typescript": "5.9.3",
     "vitest": "latest"
   }
 }
