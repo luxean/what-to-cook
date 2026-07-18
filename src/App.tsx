@@ -4,12 +4,11 @@ import type { Meal } from './types'
 import { recommend, type ScoredMeal } from './recommender'
 import { useMealStore } from './useMealStore'
 import { AuthGate } from './AuthGate'
-import { supabase } from './supabase'
 
 type Screen = 'home' | 'meals' | 'archive'
 
 export function App() {
-  const { meals, setMeals, session, authReady, syncing, cloudEnabled } = useMealStore()
+  const { meals, setMeals, authenticated, authReady, syncing, cloudEnabled, login, logout } = useMealStore()
   const [screen, setScreen] = useState<Screen>('home')
   const [suggestion, setSuggestion] = useState<ScoredMeal | null>(null)
   const [excluded, setExcluded] = useState<string[]>([])
@@ -20,7 +19,7 @@ export function App() {
   useEffect(() => { if (!toast) return; const timer = setTimeout(() => setToast(''), 2800); return () => clearTimeout(timer) }, [toast])
 
   if (!authReady) return <div className="app-loading"><LoaderCircle /></div>
-  if (cloudEnabled && !session) return <AuthGate />
+  if (cloudEnabled && !authenticated) return <AuthGate onLogin={login} />
 
   const active = useMemo(() => meals.filter(m => !m.archived), [meals])
   const suggest = (reset = false) => {
@@ -64,7 +63,7 @@ export function App() {
 
     <main>
       {screen === 'home' && <Home activeCount={active.length} suggestion={suggestion} onSuggest={() => suggest(true)} onAccept={accept} onReject={reject} onMeals={() => setScreen('meals')} />}
-      {screen === 'meals' && <MealList meals={active} cloudEnabled={cloudEnabled} syncing={syncing} onLogout={() => supabase?.auth.signOut()} onAdd={() => setShowAdd(true)} onEdit={setEditing} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} onArchive={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: true } : x))} onArchiveScreen={() => setScreen('archive')} />}
+      {screen === 'meals' && <MealList meals={active} cloudEnabled={cloudEnabled} syncing={syncing} onLogout={logout} onAdd={() => setShowAdd(true)} onEdit={setEditing} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} onArchive={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: true } : x))} onArchiveScreen={() => setScreen('archive')} />}
       {screen === 'archive' && <ArchiveList meals={meals.filter(m => m.archived)} onRestore={id => setMeals(xs => xs.map(x => x.id === id ? { ...x, archived: false, consecutiveRejections: 0 } : x))} onDelete={id => setMeals(xs => xs.filter(x => x.id !== id))} />}
     </main>
 
