@@ -1,12 +1,14 @@
 import type { Meal } from './types'
 
 const DAY = 86_400_000
+const FAVORITE_WINDOW = 365 * DAY
 
 export type ScoredMeal = { meal: Meal; score: number; reasons: string[] }
 
 export function scoreMeal(meal: Meal, now = new Date()): ScoredMeal {
-  const cookCount = meal.cookedDates.length
-  const lastCooked = cookCount ? Math.max(...meal.cookedDates.map(Number)) : null
+  const allCookedDates = meal.cookedDates.map(Number)
+  const cookCount = allCookedDates.filter(timestamp => timestamp >= now.getTime() - FAVORITE_WINDOW && timestamp <= now.getTime()).length
+  const lastCooked = allCookedDates.length ? Math.max(...allCookedDates) : null
   const daysAgo = lastCooked === null ? 90 : Math.max(0, (now.getTime() - lastCooked) / DAY)
 
   // Logarithmic frequency stops a single favorite from dominating forever.
@@ -17,7 +19,7 @@ export function scoreMeal(meal: Meal, now = new Date()): ScoredMeal {
   const lastRejected = meal.rejectionDates.length ? Math.max(...meal.rejectionDates.map(Number)) : null
   const rejectionAge = lastRejected === null ? Infinity : Math.max(0, (now.getTime() - lastRejected) / DAY)
   const rejectionPenalty = rejectionAge < 14 ? (1 - rejectionAge / 14) * (2.2 + meal.consecutiveRejections * 1.15) : 0
-  const exploration = cookCount === 0 ? 1.8 : 0
+  const exploration = allCookedDates.length === 0 ? 1.8 : 0
 
   const reasons: string[] = []
   if (cookCount >= 3) reasons.push('patrí medzi obľúbené')

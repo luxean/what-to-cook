@@ -11,6 +11,14 @@ describe('recommender', () => {
     const recent = meal({ id: '2', cookedDates: [String(now.getTime())] })
     expect(scoreMeal(oldFavorite, now).score).toBeGreaterThan(scoreMeal(recent, now).score)
   })
+  it('uses only the last year for favorite frequency while preserving recency history', () => {
+    const oldDates = [400, 500, 600].map(days => String(now.getTime() - days * 86_400_000))
+    const oldHistory = scoreMeal(meal({ cookedDates: oldDates }), now)
+    const neverCooked = scoreMeal(meal({}), now)
+    expect(oldHistory.reasons).not.toContain('patrí medzi obľúbené')
+    expect(oldHistory.reasons).toContain('naposledy pred 13 mesiacmi')
+    expect(oldHistory.score).toBeLessThan(neverCooked.score)
+  })
   it('penalizes recent rejection', () => {
     const normal = meal({})
     const rejected = meal({ rejectionDates: [String(now.getTime())], consecutiveRejections: 2 })
