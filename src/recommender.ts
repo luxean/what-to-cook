@@ -21,8 +21,8 @@ export function scoreMeal(meal: Meal, now = new Date()): ScoredMeal {
 
   const reasons: string[] = []
   if (cookCount >= 3) reasons.push('patrí medzi obľúbené')
-  if (lastCooked === null) reasons.push('ešte sme ho neskúšali')
-  else if (daysAgo >= 21) reasons.push('dlho nebolo na stole')
+  if (lastCooked === null) reasons.push('ešte nebolo')
+  else if (daysAgo >= 21) reasons.push('dlho nebolo')
   else if (daysAgo >= 7) reasons.push(`naposledy pred ${Math.floor(daysAgo)} dňami`)
 
   return { meal, score: favoriteScore + recencyScore + exploration - rejectionPenalty, reasons }

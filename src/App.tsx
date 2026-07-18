@@ -105,7 +105,7 @@ function Home({ activeCount, todayMeal, exhausted, suggestion, onSuggest, onAcce
       {!activeCount && <p className="empty-note">Najprv pridaj aspoň jedno jedlo.</p>}
     </> : <div className="suggestion-wrap">
       <span className="suggestion-label"><Sparkles size={15}/> DNES BY TO MOHLO BYŤ</span>
-      <article className="suggestion-card"><div className="mini-plate"><ChefHat /></div><h2>{suggestion.meal.name}</h2><p>{suggestion.reasons.length ? suggestion.reasons.join(' a ') : 'dnes dostalo šancu'}</p></article>
+      <article className="suggestion-card"><div className="mini-plate"><ChefHat /></div><h2>{suggestion.meal.name}</h2>{suggestion.reasons.length > 0 && <p>{suggestion.reasons.join(' a ')}</p>}</article>
       <button className="primary" onClick={onAccept}><Check/> To znie dobre</button>
       <button className="secondary" onClick={onReject}><X/> Dnes nie, skús iné</button>
     </div>}
