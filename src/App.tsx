@@ -49,11 +49,11 @@ export function App() {
     setMeals(items => items.map(meal => {
       if (meal.id !== id) return meal
       const count = meal.consecutiveRejections + 1
-      archived = count >= 3
+      archived = count >= 4
       return { ...meal, rejectionDates: [...meal.rejectionDates, String(Date.now())], consecutiveRejections: count, archived }
     }))
     const nextExcluded = [...excluded, id]; setExcluded(nextExcluded)
-    if (archived) setToast('Jedlo sme po 3 odmietnutiach presunuli do archívu.')
+    if (archived) setToast('Jedlo bolo po 4 odmietnutiach archivované.')
     const updated = meals.map(m => m.id === id ? { ...m, archived } : m)
     setSuggestion(recommend(updated.filter(meal => !meal.archived && (mealFilters.length === 0 || (mealFilters.includes('vegetarian') && meal.vegetarian) || (mealFilters.includes('fish') && meal.fish))), nextExcluded))
   }
