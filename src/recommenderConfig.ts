@@ -7,8 +7,8 @@ export const RECOMMENDER_CONFIG = Object.freeze({
   favoriteFrequencyLogarithmMultiplier: 1.35,
   favoriteExplanationMinimumCookCount: 3,
 
-  recencyDaysPerScorePoint: 10,
-  maximumRecencyScore: 4.5,
+  timeSinceCookedDaysPerScorePoint: 10,
+  maximumTimeSinceCookedScore: 4.5,
   approximateDaysPerMonthForDisplay: 30,
 
   neverCookedExplorationBonus: 0.75,

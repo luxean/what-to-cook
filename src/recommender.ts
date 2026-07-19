@@ -14,8 +14,11 @@ export function scoreMeal(meal: Meal, now = new Date()): ScoredMeal {
 
   // Logarithmic frequency stops a single favorite from dominating forever.
   const favoriteScore = Math.log2(cookCount + 1) * RECOMMENDER_CONFIG.favoriteFrequencyLogarithmMultiplier
-  // Recency grows linearly and stops at the configured maximum.
-  const recencyScore = Math.min(daysAgo / RECOMMENDER_CONFIG.recencyDaysPerScorePoint, RECOMMENDER_CONFIG.maximumRecencyScore)
+  // Time away grows linearly and stops at the configured maximum.
+  const timeSinceCookedScore = Math.min(
+    daysAgo / RECOMMENDER_CONFIG.timeSinceCookedDaysPerScorePoint,
+    RECOMMENDER_CONFIG.maximumTimeSinceCookedScore,
+  )
   // A rejection fades over a configured period; consecutive rejections add weight.
   const lastRejected = meal.rejectionDates.length ? Math.max(...meal.rejectionDates.map(Number)) : null
   const rejectionAge = lastRejected === null ? Infinity : Math.max(0, (now.getTime() - lastRejected) / MILLISECONDS_PER_DAY)
@@ -28,12 +31,12 @@ export function scoreMeal(meal: Meal, now = new Date()): ScoredMeal {
   const reasons: string[] = []
   if (cookCount >= RECOMMENDER_CONFIG.favoriteExplanationMinimumCookCount) reasons.push('patrí medzi obľúbené')
   if (lastCooked === null) reasons.push('ešte nebolo')
-  else reasons.push(recencyReason(daysAgo))
+  else reasons.push(lastCookedReason(daysAgo))
 
-  return { meal, score: favoriteScore + recencyScore + exploration - rejectionPenalty, reasons }
+  return { meal, score: favoriteScore + timeSinceCookedScore + exploration - rejectionPenalty, reasons }
 }
 
-function recencyReason(daysAgo: number) {
+function lastCookedReason(daysAgo: number) {
   const days = Math.floor(daysAgo)
   if (days === 0) return 'naposledy dnes'
   if (days === 1) return 'naposledy včera'

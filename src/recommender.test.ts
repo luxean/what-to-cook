@@ -11,7 +11,7 @@ describe('recommender', () => {
     const recent = meal({ id: '2', cookedDates: [String(now.getTime())] })
     expect(scoreMeal(oldFavorite, now).score).toBeGreaterThan(scoreMeal(recent, now).score)
   })
-  it('uses only the last year for favorite frequency while preserving recency history', () => {
+  it('uses only the last year for favorite frequency while preserving last-cooked history', () => {
     const oldDates = [400, 500, 600].map(days => String(now.getTime() - days * 86_400_000))
     const oldHistory = scoreMeal(meal({ cookedDates: oldDates }), now)
     const neverCooked = scoreMeal(meal({}), now)
@@ -24,7 +24,7 @@ describe('recommender', () => {
     const rejected = meal({ rejectionDates: [String(now.getTime())], consecutiveRejections: 2 })
     expect(scoreMeal(rejected, now).score).toBeLessThan(scoreMeal(normal, now).score)
   })
-  it('describes recency in days and then months', () => {
+  it('describes time since cooking in days and then months', () => {
     const tenDaysAgo = String(now.getTime() - 10 * 86_400_000)
     const sixtyDaysAgo = String(now.getTime() - 60 * 86_400_000)
     expect(scoreMeal(meal({ cookedDates: [tenDaysAgo] }), now).reasons).toContain('naposledy pred 10 dňami')
